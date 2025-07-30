@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  storybook-dev:
+    build:
+      context: .
+      dockerfile: docker/development/storybook/Dockerfile # Specify the development Dockerfile
+    container_name: storybook_dev_app
+    ports:
+      - '6006:6006' # Map host port 6006 to container port 6006
+    volumes:
+      # Mount your current project directory to /app in the container
+      # This allows live reloading when you change files on your host.
+      - .:/app
+      # Mount a volume for node_modules to prevent host node_modules from overwriting
+      # container's node_modules, especially if OS or architectures differ.
+      # This also helps with performance on some systems.
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      # CHOKIDAR_USEPOLLING can help with file watching issues in Docker,
+      # especially on Windows or macOS, for hot-reloading.
+      - CHOKIDAR_USEPOLLING=true
+    # If your Storybook start command is complex or you want to ensure it uses -h 0.0.0.0
+    # you can also specify it here, overriding the CMD in Dockerfile.dev
+    # command: npm run storybook # (ensure package.json script includes -h 0.0.0.0)
+    restart: unless-stopped
